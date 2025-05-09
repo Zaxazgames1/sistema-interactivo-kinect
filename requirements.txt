@@ -1,0 +1,34 @@
+# Dependencias principales
+opencv-python>=4.5.0
+numpy>=1.19.0
+pyserial>=3.5
+
+# Reconocimiento de gestos
+mediapipe>=0.8.9.1
+
+# OpenNI para Kinect (puede requerir instalación manual)
+# La instalación varía según el sistema operativo
+# Ver instrucciones en README.md
+
+# Reconocimiento de texto
+easyocr>=1.6.0
+Pillow>=8.3.0
+
+# Síntesis de voz mejorada
+pyttsx3>=2.90
+google-cloud-texttospeech>=2.11.0
+azure-cognitiveservices-speech>=1.24.0
+playsound>=1.3.0
+
+# Efectos de audio (opcional)
+# scipy>=1.7.0
+
+# Utilidades
+tqdm>=4.62.0
+colorlog>=6.6.0
+regex>=2021.8.3
+
+# Opcional: Para desarrollo y pruebas
+pytest>=6.2.5
+flake8>=4.0.0
+black>=22.3.0

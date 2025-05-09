@@ -1,0 +1,29 @@
+{
+    "motor": "google_tts",
+    "voz_genero": "femenino",
+    "voz_idioma": "es",
+    "velocidad": 1.0,
+    "volumen": 0.9,
+    "tono": 0.0,
+    "enfasis_palabras": true,
+    "pausas_naturales": true,
+    "usar_ssml": true,
+    "efectos_audio": false,
+    "google_tts": {
+        "credenciales_path": "google_credentials.json",
+        "voz_preferida": "es-ES-Standard-A",
+        "usar_wavenet": false
+    },
+    "azure_tts": {
+        "subscription_key": "TU_CLAVE_AZURE_AQUI",
+        "region": "eastus",
+        "voz_preferida": "es-ES-ElviraNeural",
+        "estilo_habla": "general",
+        "formato_audio": "audio16khz128kbitratemonomp3"
+    },
+    "pyttsx3": {
+        "optimizar_rendimiento": true,
+        "verificar_voces_espanol": true,
+        "usar_voz_femenina": true
+    }
+}
