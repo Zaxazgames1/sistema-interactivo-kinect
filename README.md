@@ -5,6 +5,7 @@
   <img src="https://img.shields.io/badge/OpenCV-4.5.0%2B-green?style=for-the-badge&logo=opencv" alt="OpenCV 4.5.0+"/>
   <img src="https://img.shields.io/badge/MediaPipe-0.8.9%2B-orange?style=for-the-badge" alt="MediaPipe 0.8.9+"/>
   <img src="https://img.shields.io/badge/EasyOCR-1.6.0%2B-red?style=for-the-badge" alt="EasyOCR 1.6.0+"/>
+  <img src="https://img.shields.io/badge/Google_TTS-2.11.0%2B-yellow?style=for-the-badge&logo=google-cloud" alt="Google TTS 2.11.0+"/>
   <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="License MIT"/>
 </div>
 
@@ -21,6 +22,7 @@
 - [🧩 Arquitectura del Sistema](#-arquitectura-del-sistema)
 - [✨ Gestos Soportados](#-gestos-soportados)
 - [🎮 Modos de Operación](#-modos-de-operación)
+- [🔊 Síntesis de Voz Mejorada](#-síntesis-de-voz-mejorada)
 - [🔧 Configuración Avanzada](#-configuración-avanzada)
 - [🤝 Contribuciones](#-contribuciones)
 - [📄 Licencia](#-licencia)
@@ -33,7 +35,8 @@ Este sistema revolucionario integra tecnologías avanzadas para crear una experi
 - **Reconocimiento de Gestos en Tiempo Real**: Detecta con precisión la posición y movimientos de las manos utilizando MediaPipe.
 - **Dibujo Gestual en el Aire**: Convierte los gestos en trazos digitales con un sistema de dibujo intuitivo.
 - **Reconocimiento Óptico de Caracteres**: Identifica texto escrito a mano con procesamiento avanzado de imágenes.
-- **Síntesis de Voz Natural**: Convierte texto reconocido en audio claro y natural.
+- **Síntesis de Voz Premium**: Convierte texto reconocido en audio de alta calidad mediante Google TTS.
+- **Detección Automática de Puertos**: Identifica y conecta automáticamente con la mano robótica sin configuración manual.
 - **Control de Mano Robótica**: Transmite comandos a dispositivos externos mediante comunicación serial.
 - **Interfaz Adaptativa**: Diseño intuitivo que responde a gestos sin necesidad de dispositivos tradicionales.
 - **Arquitectura Modular**: Código organizado en componentes independientes para fácil mantenimiento y expansión.
@@ -66,6 +69,9 @@ Este sistema ha sido diseñado para múltiples escenarios:
   - RAM: 8GB
   - Espacio libre en disco: 2GB
   - Tarjeta gráfica: Compatible con OpenGL 2.0+
+- **Opcional**:
+  - Mano robótica o dispositivo serial compatible
+  - Conexión a Internet para Google TTS (alta calidad de voz)
 
 ### Software
 - **Sistema Operativo**:
@@ -78,7 +84,7 @@ Este sistema ha sido diseñado para múltiples escenarios:
   - MediaPipe 0.8.9.1+
   - OpenNI2 (para Kinect)
   - EasyOCR 1.6.0+
-  - pyttsx3 2.90+
+  - Google Cloud Text-to-Speech 2.11.0+
   - PySerial 3.5+
 
 ## ⚙️ Instalación
@@ -119,7 +125,29 @@ sudo apt-get install libopenni2-dev
 brew install openni2
 ```
 
-### 3. Configuración del Sistema
+### 3. Configurar Google TTS (para síntesis de voz de alta calidad)
+
+1. **Crear un proyecto en Google Cloud Platform**:
+   - Visite [console.cloud.google.com](https://console.cloud.google.com/)
+   - Cree un nuevo proyecto o seleccione uno existente
+
+2. **Habilitar la API de Text-to-Speech**:
+   - En la consola, vaya a "APIs y servicios" > "Biblioteca"
+   - Busque "Cloud Text-to-Speech API" y habilítela
+
+3. **Crear credenciales de servicio**:
+   - Vaya a "APIs y servicios" > "Credenciales"
+   - Haga clic en "Crear credenciales" > "Cuenta de servicio"
+   - Asigne un nombre a la cuenta de servicio y haga clic en "Crear"
+   - Otorgue el rol "Cloud Text-to-Speech Usuario" y luego "Continuar"
+   - Haga clic en "Listo"
+   - En la lista de cuentas de servicio, encuentre la cuenta recién creada
+   - Haga clic en los tres puntos verticales > "Administrar claves"
+   - Haga clic en "Agregar clave" > "Crear nueva clave"
+   - Seleccione "JSON" y haga clic en "Crear"
+   - Renombre el archivo descargado a `google_credentials.json` y colóquelo en la raíz del proyecto
+
+### 4. Configuración del Sistema
 
 Personalice el archivo `config.json` según sus necesidades:
 
@@ -131,17 +159,68 @@ Personalice el archivo `config.json` según sus necesidades:
   },
   "mano_robotica": {
     "puerto": "COM5",
-    "baudios": 9600
+    "baudios": 9600,
+    "timeout": 2,
+    "identificadores": ["Arduino", "CH340", "USB Serial", "FTDI", "CP210x"]
   },
   "ui": {
     "botones": {
       "Dibujar": [50, 50],
-      "Borrar": [200, 50],
-      "Guardar": [350, 50],
-      "Configuración": [500, 50],
-      "Salir": [650, 50]
+      "Borrar": [170, 50],
+      "Limpiar": [290, 50],
+      "Guardar": [410, 50],
+      "Salir": [530, 50]
+    },
+    "dimensiones_boton": {
+      "ancho": 100,
+      "alto": 40
+    },
+    "colores": {
+      "dibujo": [0, 255, 0],
+      "borrador": [0, 0, 0],
+      "fondo": [0, 0, 0],
+      "boton_normal": [200, 200, 200],
+      "boton_seleccionado": [0, 255, 255],
+      "texto": [255, 255, 255]
     }
-  }
+  },
+  "dibujo": {
+    "grosor_linea": 3,
+    "radio_borrador": 30,
+    "autosave_interval": 60,
+    "sesiones_dir": "sesiones"
+  },
+  "modo_debug": false,
+  "idiomas_ocr": ["es", "en"]
+}
+```
+
+### 5. Configurar la Síntesis de Voz
+
+Cree un archivo `configuracion_voz.json` en la raíz del proyecto:
+
+```json
+{
+    "motor": "google_tts",
+    "voz_genero": "femenino",
+    "voz_idioma": "es",
+    "velocidad": 1.0,
+    "volumen": 0.9,
+    "tono": 0.0,
+    "enfasis_palabras": true,
+    "pausas_naturales": true,
+    "usar_ssml": true,
+    "efectos_audio": false,
+    "google_tts": {
+        "credenciales_path": "google_credentials.json",
+        "voz_preferida": "es-ES-Standard-A",
+        "usar_wavenet": true
+    },
+    "pyttsx3": {
+        "optimizar_rendimiento": true,
+        "verificar_voces_espanol": true,
+        "usar_voz_femenina": true
+    }
 }
 ```
 
@@ -159,7 +238,7 @@ python main.py --webcam
 # Iniciar en modo debug
 python main.py --debug
 
-# Especificar puerto de mano robótica
+# Especificar puerto de mano robótica (ahora con detección automática)
 python main.py --puerto COM3
 ```
 
@@ -173,7 +252,7 @@ python main.py --puerto COM3
 2. **Guardar y Reconocer Texto**:
    - Dibuje letras o palabras en el área de dibujo
    - Seleccione "Guardar" para procesar el texto
-   - El texto reconocido se mostrará en pantalla, se leerá en voz alta y se enviará a la mano robótica si está conectada
+   - El texto reconocido se mostrará en pantalla, se leerá en voz alta con Google TTS y se enviará a la mano robótica si está conectada
 
 3. **Borrado**:
    - Seleccione "Borrar" para activar el modo borrador
@@ -188,6 +267,8 @@ El sistema está diseñado con una arquitectura modular orientada a objetos que 
 sistema-interactivo-kinect/
 ├── main.py                # Punto de entrada principal
 ├── config.json            # Configuración centralizada
+├── configuracion_voz.json # Configuración del motor de voz
+├── google_credentials.json # Credenciales para Google TTS (no incluido)
 ├── sistema/               # Módulo principal
 │   ├── __init__.py        # Exportaciones del módulo
 │   ├── sistema_interactivo.py # Clase principal coordinadora
@@ -235,7 +316,34 @@ El sistema reconoce los siguientes gestos de mano:
 - Activo al seleccionar el botón "Guardar"
 - Procesa el dibujo actual para reconocer texto
 - Muestra resultados en pantalla secundaria
-- Sintetiza voz y envía a dispositivos externos
+- Sintetiza voz premium y envía a dispositivos externos
+
+## 🔊 Síntesis de Voz Mejorada
+
+El sistema incluye un motor de síntesis de voz avanzado con múltiples opciones:
+
+### Google TTS (Principal)
+- Alta calidad de síntesis con voces naturales
+- Soporta SSML para mayor control sobre la pronunciación
+- Requiere conexión a internet y credenciales de Google Cloud
+- Configuración en `configuracion_voz.json`
+
+### Respaldo Offline (pyttsx3)
+- Funciona sin conexión a internet
+- Menor calidad pero siempre disponible
+- Activación automática si Google TTS no está disponible
+
+### Herramienta de Comparación
+Incluye una herramienta para probar diferentes motores de voz:
+
+```bash
+python comparar_motores_voz.py
+```
+
+Esta utilidad permite:
+- Comparar la calidad de los diferentes motores
+- Probar diferentes configuraciones (velocidad, tono)
+- Configurar el motor preferido como predeterminado
 
 ## 🔧 Configuración Avanzada
 
@@ -256,7 +364,26 @@ Modifique estos parámetros en `config.json` para personalizar el comportamiento
       "boton_seleccionado": [0, 255, 255] // Color de botón activo
     }
   },
+  "mano_robotica": {
+    "identificadores": ["Arduino", "CH340", "USB Serial", "FTDI"] // Identificadores para detección automática
+  },
   "idiomas_ocr": ["es", "en"]  // Idiomas para reconocimiento
+}
+```
+
+### Configuración de Síntesis de Voz
+
+Ajuste estos parámetros en `configuracion_voz.json`:
+
+```json
+{
+    "velocidad": 1.0,      // Velocidad de habla (0.5-2.0)
+    "volumen": 0.9,        // Volumen (0.0-1.0)
+    "tono": 0.0,           // Ajuste de tono (-10.0 a 10.0)
+    "google_tts": {
+        "voz_preferida": "es-ES-Standard-A",  // ID de voz
+        "usar_wavenet": true  // Usar voces de alta calidad
+    }
 }
 ```
 
@@ -272,7 +399,7 @@ optional arguments:
   --debug          Activar modo debug
   --config CONFIG  Ruta al archivo de configuración
   --webcam         Usar webcam en lugar de Kinect
-  --puerto PUERTO  Puerto para la mano robótica
+  --puerto PUERTO  Puerto para la mano robótica (opcional, ahora con detección automática)
 ```
 
 ## 🤝 Contribuciones
