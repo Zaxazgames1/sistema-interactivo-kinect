@@ -94,13 +94,8 @@ class SistemaInteractivo:
             if not self.mano_robotica.conectar(puerto_override=self.puerto_mano):
                 self.ui_manager.mostrar_mensaje(f"Error al conectar mano robótica en {self.puerto_mano}", 3)
         else:
-            # Usar detección automática
-            resultado_conexion = self.mano_robotica.conectar()
-            if resultado_conexion:
-                puerto_detectado = self.mano_robotica.puerto_auto_detectado or self.mano_robotica.puerto_configurado
-                self.ui_manager.mostrar_mensaje(f"Mano robótica conectada en {puerto_detectado}", 3)
-            else:
-                self.ui_manager.mostrar_mensaje("No se pudo conectar la mano robótica. Verifica la conexión.", 3)
+            if not self.mano_robotica.conectar():
+                self.ui_manager.mostrar_mensaje("Mano robótica no conectada. Verifica la conexión.", 3)
         
         # Iniciar reconocimiento de texto en segundo plano
         self.text_recognizer.iniciar()
@@ -135,25 +130,36 @@ class SistemaInteractivo:
     def _procesar_accion_boton(self, boton: str) -> None:
         """Procesa la acción correspondiente al botón seleccionado."""
         self.ui_manager.boton_seleccionado = boton
-        self.ui_manager.estado_mano = f"Botón: {boton}"
         
         if boton == "Dibujar":
+            # Activar modo dibujo
             self.modo_actual = "dibujar"
-            self.ui_manager.mostrar_mensaje("Modo dibujo activado", 2)
+            self.ui_manager.estado_mano = "Modo: Dibujo"
+            self.ui_manager.mostrar_mensaje("Modo dibujo activado. Use el dedo índice para dibujar.", 2)
         
         elif boton == "Borrar":
+            # Activar modo borrador
             self.modo_actual = "borrar"
-            self.ui_manager.mostrar_mensaje("Modo borrador activado", 2)
+            self.ui_manager.estado_mano = "Modo: Borrador"
+            self.ui_manager.mostrar_mensaje("Modo borrador activado. Use la mano para borrar.", 2)
         
         elif boton == "Limpiar":
+            # Limpiar el lienzo y desactivar cualquier modo
             self.dibujo_manager.limpiar_dibujo()
-            self.ui_manager.mostrar_mensaje("Lienzo limpiado", 2)
+            self.modo_actual = None  # Desactivar modo actual
+            self.ui_manager.estado_mano = "Lienzo limpiado"
+            self.ui_manager.mostrar_mensaje("Lienzo limpiado. Seleccione 'Dibujar' o 'Borrar' para continuar.", 2)
         
         elif boton == "Guardar":
+            # Procesar guardado y desactivar cualquier modo
             self._procesar_guardado()
+            self.modo_actual = None  # Desactivar modo actual
+            self.ui_manager.estado_mano = "Guardando..."
         
         elif boton == "Salir":
+            # Salir del programa
             self.ejecutando = False
+            self.ui_manager.estado_mano = "Cerrando..."
     
     def _procesar_guardado(self) -> None:
         """Procesa la acción de guardar y reconocer texto."""
@@ -256,6 +262,7 @@ class SistemaInteractivo:
             elif self.modo_actual == "borrar":
                 self.dibujo_manager.borrar_punto(x_index, y_index)
             else:
+                # Si no estamos en un modo de dibujo o borrado, simplemente terminamos cualquier trazo
                 self.dibujo_manager.terminar_dibujo()
             
             # Verificar gesto para seleccionar botón (puño cerrado)

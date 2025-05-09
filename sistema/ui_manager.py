@@ -28,6 +28,7 @@ class UIManager:
         self.fps_contador = 0
         self.fps_tiempo = time.time()
         self.modo_debug = config_manager.obtener_config().get("modo_debug", False)
+        self.modo_actual = None  # Almacena el modo actual del sistema
         
         # Ventanas secundarias
         self.ventanas_secundarias = {}
@@ -118,6 +119,11 @@ class UIManager:
         self.mensaje_sistema = mensaje
         self.mensaje_timeout = time.time() + duracion
     
+    def mostrar_modo(self, modo: str) -> None:
+        """Muestra el modo actual en la interfaz."""
+        # Simplemente almacenamos el modo; se mostrará en dibujar_ui
+        self.modo_actual = modo
+    
     def dibujar_ui(self, frame: np.ndarray, dibujo: np.ndarray) -> np.ndarray:
         """Dibuja la interfaz de usuario sobre el frame."""
         if not self.ventana_creada:
@@ -133,6 +139,18 @@ class UIManager:
             
             # Dibujar botones principales
             self._dibujar_botones(self.botones, self.capa_botones)
+            
+            # Mostrar el modo actual
+            if hasattr(self, 'modo_actual') and self.modo_actual:
+                cv2.putText(
+                    self.capa_botones, 
+                    f"Modo: {self.modo_actual}", 
+                    (20, frame.shape[0] - 110),  # Posición encima del estado
+                    cv2.FONT_HERSHEY_SIMPLEX, 
+                    0.7, 
+                    (0, 255, 255),  # Color destacado
+                    2
+                )
             
             # Mostrar estado y mensajes
             y_texto = frame.shape[0] - 80
