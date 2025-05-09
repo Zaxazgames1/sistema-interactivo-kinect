@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Script mejorado para comparar los diferentes motores de voz disponibles.
+Script mejorado para comparar los diferentes motores de voz disponibles,
+ahora incluyendo gTTS (Google Translate TTS, gratuito).
 """
 
 import os
@@ -35,7 +36,7 @@ TEXTO_SALUDOS = "Hola, bienvenido al Sistema Interactivo con Kinect. Estoy aquí
 class OpcionMotor(Enum):
     PYTTSX3 = "pyttsx3"
     GOOGLE = "google_tts"
-    AZURE = "azure_tts"
+    GTTS = "gtts"
 
 def probar_motor(motor, texto, usar_config_predeterminada=True):
     """Prueba un motor de voz específico con el texto dado."""
@@ -48,7 +49,7 @@ def probar_motor(motor, texto, usar_config_predeterminada=True):
             voice = VoiceEngine()
             
             # Cambiar al motor deseado
-            if voice.motor_actual.value != motor:
+            if hasattr(voice, 'motor_actual') and getattr(voice, 'motor_actual', None) and voice.motor_actual.value != motor:
                 print(f"Cambiando motor a {motor}...")
                 voice.cambiar_motor(motor)
         else:
@@ -74,7 +75,8 @@ def probar_motor(motor, texto, usar_config_predeterminada=True):
         
         # Mostrar información
         print(f"\nProbando motor: {motor}")
-        print(f"Motor actual: {voice.motor_actual}")
+        if hasattr(voice, 'motor_actual'):
+            print(f"Motor actual: {voice.motor_actual}")
         
         # Intentar hablar
         print("Reproduciendo mensaje...")
@@ -99,6 +101,7 @@ def comparar_motores():
     """Función principal para comparar los diferentes motores de voz."""
     print("===== COMPARACIÓN DE MOTORES DE VOZ MEJORADA =====")
     print("Este script te permitirá probar y comparar los diferentes motores de voz disponibles.")
+    print("Ahora incluye gTTS, un motor gratuito de alta calidad de Google Translate.")
     
     # Verificar si existe el archivo de configuración
     if not os.path.exists("configuracion_voz.json"):
@@ -107,7 +110,7 @@ def comparar_motores():
         
         import json
         config_basica = {
-            "motor": "pyttsx3",
+            "motor": "gtts",
             "voz_genero": "femenino",
             "voz_idioma": "es",
             "velocidad": 1.0,
@@ -122,11 +125,14 @@ def comparar_motores():
                 "voz_preferida": "es-ES-Standard-A",
                 "usar_wavenet": False
             },
-            "azure_tts": {
-                "subscription_key": "",
-                "region": "eastus",
-                "voz_preferida": "es-ES-ElviraNeural",
-                "estilo_habla": "general"
+            "gtts": {
+                "slow": False,
+                "top_level_domain": "com.mx"
+            },
+            "pyttsx3": {
+                "optimizar_rendimiento": True,
+                "verificar_voces_espanol": True,
+                "usar_voz_femenina": True
             }
         }
         
@@ -163,43 +169,34 @@ def comparar_motores():
         print("NOTA: google-cloud-texttospeech no está instalado. Instálalo con: pip install google-cloud-texttospeech")
     
     try:
-        import azure.cognitiveservices.speech as speechsdk
-        azure_tts_disponible = True
-        
-        # Verificar clave de Azure
-        try:
-            import json
-            with open("configuracion_voz.json", "r", encoding="utf-8") as f:
-                config = json.load(f)
-                subscription_key = config.get("azure_tts", {}).get("subscription_key")
-                if not subscription_key:
-                    print("ADVERTENCIA: No se encontró clave de suscripción de Azure en configuracion_voz.json")
-        except:
-            pass
+        from gtts import gTTS
+        gtts_disponible = True
+        print("gTTS está disponible. ¡Excelente!")
     except ImportError:
-        azure_tts_disponible = False
-        print("NOTA: azure-cognitiveservices-speech no está instalado. Instálalo con: pip install azure-cognitiveservices-speech")
+        gtts_disponible = False
+        print("NOTA: gTTS no está instalado. Instálalo con: pip install gtts")
     
     # Mostrar motores disponibles
     print("\nMotores disponibles:")
-    print(f" - pyttsx3: {'Disponible' if pyttsx3_disponible else 'No disponible'}")
-    print(f" - Google TTS: {'Disponible' if google_tts_disponible else 'No disponible'}")
-    print(f" - Azure TTS: {'Disponible' if azure_tts_disponible else 'No disponible'}")
+    print(f" - pyttsx3 (básico): {'Disponible' if pyttsx3_disponible else 'No disponible'}")
+    print(f" - Google TTS (alta calidad, pago): {'Disponible' if google_tts_disponible else 'No disponible'}")
+    print(f" - gTTS (Google Translate, gratuito): {'Disponible' if gtts_disponible else 'No disponible'}")
     
     # Menú de prueba
     while True:
         print("\n===== MENÚ DE COMPARACIÓN =====")
         print("1. Probar pyttsx3 (voz básica, sin internet)")
-        print("2. Probar Google TTS (alta calidad, requiere internet)")
-        print("3. Probar Azure TTS (alta calidad, requiere internet y clave de API)")
+        print("2. Probar Google TTS (alta calidad, requiere internet y credenciales)")
+        print("3. Probar gTTS (buena calidad, gratuito)")
         print("4. Comparación directa de todos los motores disponibles")
         print("5. Prueba avanzada (texto largo)")
         print("6. Prueba de saludos del sistema")
         print("7. Modificar velocidad/tono")
-        print("8. Salir")
+        print("8. Configurar gTTS como predeterminado")
+        print("9. Salir")
         
         try:
-            opcion = int(input("\nSelecciona una opción (1-8): "))
+            opcion = int(input("\nSelecciona una opción (1-9): "))
             
             if opcion == 1:
                 if pyttsx3_disponible:
@@ -218,12 +215,12 @@ def comparar_motores():
                     print("Google TTS no está disponible. Instálalo con: pip install google-cloud-texttospeech")
             
             elif opcion == 3:
-                if azure_tts_disponible:
-                    probar_motor(OpcionMotor.AZURE.value, TEXTO_PRUEBA_CORTO)
+                if gtts_disponible:
+                    probar_motor(OpcionMotor.GTTS.value, TEXTO_PRUEBA_CORTO)
                     valoracion = input("\n¿Cómo calificarías esta voz del 1 al 10? ")
-                    print(f"Has valorado Azure TTS con: {valoracion}/10")
+                    print(f"Has valorado gTTS con: {valoracion}/10")
                 else:
-                    print("Azure TTS no está disponible. Instálalo con: pip install azure-cognitiveservices-speech")
+                    print("gTTS no está disponible. Instálalo con: pip install gtts")
             
             elif opcion == 4:
                 print("\n===== COMPARACIÓN DIRECTA =====")
@@ -243,11 +240,11 @@ def comparar_motores():
                     valoracion = input("Valoración (1-10): ")
                     resultados["Google TTS"] = valoracion
                 
-                if azure_tts_disponible:
-                    print("\n----- Azure TTS -----")
-                    probar_motor(OpcionMotor.AZURE.value, TEXTO_PRUEBA_CORTO)
+                if gtts_disponible:
+                    print("\n----- gTTS -----")
+                    probar_motor(OpcionMotor.GTTS.value, TEXTO_PRUEBA_CORTO)
                     valoracion = input("Valoración (1-10): ")
-                    resultados["Azure TTS"] = valoracion
+                    resultados["gTTS"] = valoracion
                 
                 # Mostrar resultados
                 print("\n===== RESULTADOS DE LA COMPARACIÓN =====")
@@ -267,8 +264,8 @@ def comparar_motores():
                                 motor_config = "pyttsx3"
                             elif mejor_motor[0] == "Google TTS":
                                 motor_config = "google_tts"
-                            elif mejor_motor[0] == "Azure TTS":
-                                motor_config = "azure_tts"
+                            elif mejor_motor[0] == "gTTS":
+                                motor_config = "gtts"
                                 
                             if motor_config:
                                 import json
@@ -291,28 +288,28 @@ def comparar_motores():
                 print("\n===== PRUEBA AVANZADA =====")
                 print("Se reproducirá un texto más largo con cada motor.")
                 
-                motor_elegido = input("¿Qué motor quieres probar? (1: pyttsx3, 2: Google TTS, 3: Azure TTS): ")
+                motor_elegido = input("¿Qué motor quieres probar? (1: pyttsx3, 2: Google TTS, 3: gTTS): ")
                 
                 if motor_elegido == "1" and pyttsx3_disponible:
                     probar_motor(OpcionMotor.PYTTSX3.value, TEXTO_PRUEBA_LARGO)
                 elif motor_elegido == "2" and google_tts_disponible:
                     probar_motor(OpcionMotor.GOOGLE.value, TEXTO_PRUEBA_LARGO)
-                elif motor_elegido == "3" and azure_tts_disponible:
-                    probar_motor(OpcionMotor.AZURE.value, TEXTO_PRUEBA_LARGO)
+                elif motor_elegido == "3" and gtts_disponible:
+                    probar_motor(OpcionMotor.GTTS.value, TEXTO_PRUEBA_LARGO)
                 else:
                     print("Opción no válida o motor no disponible.")
             
             elif opcion == 6:
                 print("\n===== PRUEBA DE SALUDOS DEL SISTEMA =====")
                 
-                motor_elegido = input("¿Qué motor quieres probar? (1: pyttsx3, 2: Google TTS, 3: Azure TTS): ")
+                motor_elegido = input("¿Qué motor quieres probar? (1: pyttsx3, 2: Google TTS, 3: gTTS): ")
                 
                 if motor_elegido == "1" and pyttsx3_disponible:
                     probar_motor(OpcionMotor.PYTTSX3.value, TEXTO_SALUDOS)
                 elif motor_elegido == "2" and google_tts_disponible:
                     probar_motor(OpcionMotor.GOOGLE.value, TEXTO_SALUDOS)
-                elif motor_elegido == "3" and azure_tts_disponible:
-                    probar_motor(OpcionMotor.AZURE.value, TEXTO_SALUDOS)
+                elif motor_elegido == "3" and gtts_disponible:
+                    probar_motor(OpcionMotor.GTTS.value, TEXTO_SALUDOS)
                 else:
                     print("Opción no válida o motor no disponible.")
             
@@ -354,6 +351,28 @@ def comparar_motores():
                 voice.cerrar()
             
             elif opcion == 8:
+                if gtts_disponible:
+                    # Configurar gTTS como motor predeterminado
+                    import json
+                    try:
+                        with open("configuracion_voz.json", "r", encoding="utf-8") as f:
+                            config = json.load(f)
+                        
+                        config["motor"] = "gtts"
+                        
+                        with open("configuracion_voz.json", "w", encoding="utf-8") as f:
+                            json.dump(config, f, indent=4)
+                        
+                        print("gTTS configurado como motor predeterminado.")
+                        
+                        # Probar el motor
+                        probar_motor(OpcionMotor.GTTS.value, "gTTS ha sido configurado como el motor de voz predeterminado para el sistema.")
+                    except Exception as e:
+                        print(f"Error al configurar gTTS como predeterminado: {e}")
+                else:
+                    print("gTTS no está disponible. Instálalo con: pip install gtts")
+            
+            elif opcion == 9:
                 print("Saliendo del programa...")
                 break
             
@@ -361,7 +380,7 @@ def comparar_motores():
                 print("Opción no válida. Intenta de nuevo.")
         
         except ValueError:
-            print("Por favor, introduce un número del 1 al 8.")
+            print("Por favor, introduce un número del 1 al 9.")
         except Exception as e:
             print(f"Error: {e}")
     

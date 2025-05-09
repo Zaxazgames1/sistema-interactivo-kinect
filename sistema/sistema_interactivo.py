@@ -56,6 +56,12 @@ class SistemaInteractivo:
                     self.voice_engine._guardar_config()
         except Exception as e:
             logger.warning(f"No se pudo configurar Google TTS: {e}")
+            # Si falla Google TTS, intentar con pyttsx3 como respaldo
+            try:
+                if hasattr(self.voice_engine, 'cambiar_motor'):
+                    self.voice_engine.cambiar_motor("pyttsx3")
+            except Exception as e2:
+                logger.warning(f"También falló el motor de respaldo: {e2}")
         
         self.ui_manager = UIManager(self.config_manager)
         self.dibujo_manager = DibujoManager(self.config_manager)
@@ -94,8 +100,13 @@ class SistemaInteractivo:
             if not self.mano_robotica.conectar(puerto_override=self.puerto_mano):
                 self.ui_manager.mostrar_mensaje(f"Error al conectar mano robótica en {self.puerto_mano}", 3)
         else:
-            if not self.mano_robotica.conectar():
-                self.ui_manager.mostrar_mensaje("Mano robótica no conectada. Verifica la conexión.", 3)
+            # Usar detección automática
+            resultado_conexion = self.mano_robotica.conectar()
+            if resultado_conexion:
+                puerto_detectado = getattr(self.mano_robotica, 'puerto_auto_detectado', None) or self.mano_robotica.puerto_configurado
+                self.ui_manager.mostrar_mensaje(f"Mano robótica conectada en {puerto_detectado}", 3)
+            else:
+                self.ui_manager.mostrar_mensaje("No se pudo conectar la mano robótica. Verifica la conexión.", 3)
         
         # Iniciar reconocimiento de texto en segundo plano
         self.text_recognizer.iniciar()
@@ -110,6 +121,7 @@ class SistemaInteractivo:
                     self.voice_engine.cambiar_motor("google_tts")
                 except Exception as e:
                     logger.warning(f"Error al cambiar a Google TTS: {e}")
+                    logger.info("Usando motor de voz alternativo")
         
         # Crear directorio para sesiones si no existe
         sesiones_dir = self.config.get("dibujo", {}).get("sesiones_dir", "sesiones")
@@ -160,6 +172,17 @@ class SistemaInteractivo:
             # Salir del programa
             self.ejecutando = False
             self.ui_manager.estado_mano = "Cerrando..."
+        
+        # Actualizar la interfaz
+        if hasattr(self.ui_manager, 'mostrar_modo'):
+            if self.modo_actual == "dibujar":
+                self.ui_manager.mostrar_modo("Dibujo")
+            elif self.modo_actual == "borrar":
+                self.ui_manager.mostrar_modo("Borrador")
+            elif self.modo_actual is None:
+                self.ui_manager.mostrar_modo("Ninguno")
+            else:
+                self.ui_manager.mostrar_modo(self.modo_actual)
     
     def _procesar_guardado(self) -> None:
         """Procesa la acción de guardar y reconocer texto."""
