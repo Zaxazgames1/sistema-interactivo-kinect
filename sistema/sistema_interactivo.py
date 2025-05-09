@@ -94,8 +94,13 @@ class SistemaInteractivo:
             if not self.mano_robotica.conectar(puerto_override=self.puerto_mano):
                 self.ui_manager.mostrar_mensaje(f"Error al conectar mano robótica en {self.puerto_mano}", 3)
         else:
-            if not self.mano_robotica.conectar():
-                self.ui_manager.mostrar_mensaje("Mano robótica no disponible.", 3)
+            # Usar detección automática
+            resultado_conexion = self.mano_robotica.conectar()
+            if resultado_conexion:
+                puerto_detectado = self.mano_robotica.puerto_auto_detectado or self.mano_robotica.puerto_configurado
+                self.ui_manager.mostrar_mensaje(f"Mano robótica conectada en {puerto_detectado}", 3)
+            else:
+                self.ui_manager.mostrar_mensaje("No se pudo conectar la mano robótica. Verifica la conexión.", 3)
         
         # Iniciar reconocimiento de texto en segundo plano
         self.text_recognizer.iniciar()

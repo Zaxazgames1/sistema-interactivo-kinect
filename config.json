@@ -1,55 +1,139 @@
 {
-  "kinect": {
-    "openni_path": "C:/Program Files/OpenNI2/Redist",
-    "resolution": [640, 480]
-  },
-  "mano_robotica": {
-    "puerto": "COM5",
-    "baudios": 9600,
-    "timeout": 2
-  },
-  "ui": {
-    "botones": {
-      "Dibujar": [50, 50],
-      "Borrar": [170, 50],
-      "Limpiar": [290, 50],
-      "Guardar": [410, 50],
-      "Salir": [530, 50]
+    "kinect": {
+        "openni_path": "C:/Program Files/OpenNI2/Redist",
+        "resolution": [
+            640,
+            480
+        ]
     },
-    "dimensiones_boton": {
-      "ancho": 100,
-      "alto": 40
+    "mano_robotica": {
+        "puerto": "COM5",
+        "baudios": 9600,
+        "timeout": 2,
+        "identificadores": [
+            "Arduino",
+            "CH340",
+            "USB Serial",
+            "FTDI",
+            "CP210x"
+        ]
     },
-    "paleta_colores": {
-      "Verde": [0, 255, 0],
-      "Rojo": [0, 0, 255],
-      "Azul": [255, 0, 0],
-      "Amarillo": [0, 255, 255],
-      "Blanco": [255, 255, 255],
-      "Negro": [0, 0, 0]
+    "ui": {
+        "botones": {
+            "Dibujar": [
+                50,
+                50
+            ],
+            "Borrar": [
+                170,
+                50
+            ],
+            "Limpiar": [
+                290,
+                50
+            ],
+            "Guardar": [
+                410,
+                50
+            ],
+            "Salir": [
+                530,
+                50
+            ]
+        },
+        "dimensiones_boton": {
+            "ancho": 100,
+            "alto": 40
+        },
+        "paleta_colores": {
+            "Verde": [
+                0,
+                255,
+                0
+            ],
+            "Rojo": [
+                0,
+                0,
+                255
+            ],
+            "Azul": [
+                255,
+                0,
+                0
+            ],
+            "Amarillo": [
+                0,
+                255,
+                255
+            ],
+            "Blanco": [
+                255,
+                255,
+                255
+            ],
+            "Negro": [
+                0,
+                0,
+                0
+            ]
+        },
+        "colores": {
+            "dibujo": [
+                0,
+                255,
+                0
+            ],
+            "borrador": [
+                0,
+                0,
+                0
+            ],
+            "fondo": [
+                0,
+                0,
+                0
+            ],
+            "boton_normal": [
+                200,
+                200,
+                200
+            ],
+            "boton_seleccionado": [
+                0,
+                255,
+                255
+            ],
+            "texto": [
+                255,
+                255,
+                255
+            ],
+            "ayuda": [
+                255,
+                255,
+                200
+            ],
+            "indicador": [
+                255,
+                0,
+                255
+            ]
+        }
     },
-    "colores": {
-      "dibujo": [0, 255, 0],
-      "borrador": [0, 0, 0],
-      "fondo": [0, 0, 0],
-      "boton_normal": [200, 200, 200],
-      "boton_seleccionado": [0, 255, 255],
-      "texto": [255, 255, 255],
-      "ayuda": [255, 255, 200],
-      "indicador": [255, 0, 255]
-    }
-  },
-  "dibujo": {
-    "grosor_linea": 3,
-    "radio_borrador": 30,
-    "autosave_interval": 60,
-    "sesiones_dir": "sesiones"
-  },
-  "calibracion": {
-    "sensibilidad_gestos": 0.7,
-    "distancia_minima_dedos": 0.1,
-    "tiempo_gesto": 0.5
-  },
-  "modo_debug": false,
-  "idiomas_ocr": ["es", "en"]
+    "dibujo": {
+        "grosor_linea": 3,
+        "radio_borrador": 30,
+        "autosave_interval": 60,
+        "sesiones_dir": "sesiones"
+    },
+    "calibracion": {
+        "sensibilidad_gestos": 0.7,
+        "distancia_minima_dedos": 0.1,
+        "tiempo_gesto": 0.5
+    },
+    "modo_debug": false,
+    "idiomas_ocr": [
+        "es",
+        "en"
+    ]
 }
