@@ -1,0 +1,9 @@
+{
+    "personalidad": "amigable",
+    "nivel_verbosidad": 2,
+    "activo": true,
+    "modo_tutorial": false,
+    "repetir_instrucciones": true,
+    "tiempo_entre_consejos": 60,
+    "volumen_efectos": 0.8
+}
