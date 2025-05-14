@@ -133,6 +133,16 @@ class DibujoManager:
         if nombre_color in self.paleta_colores:
             self.color_dibujo = tuple(self.paleta_colores[nombre_color])
             logger.info(f"Color de dibujo cambiado a {nombre_color}: {self.color_dibujo}")
+            
+            # Narrar el cambio de color si el asistente está disponible
+            try:
+                from . import sistema_interactivo
+                if hasattr(sistema_interactivo, 'asistente'):
+                    sistema_interactivo.asistente.hablar(f"Color cambiado a {nombre_color}", 
+                                                       prioridad=1, categoria="configuracion")
+            except:
+                pass
+                
             return True
         logger.warning(f"Color {nombre_color} no encontrado en la paleta.")
         return False
@@ -155,6 +165,16 @@ class DibujoManager:
             self.historial_index -= 1
             self._reconstruir_dibujo()
             logger.info("Acción deshecha.")
+            
+            # Narrar la acción si el asistente está disponible
+            try:
+                from . import sistema_interactivo
+                if hasattr(sistema_interactivo, 'asistente'):
+                    sistema_interactivo.asistente.hablar("Acción deshecha", 
+                                                       prioridad=1, categoria="edicion")
+            except:
+                pass
+                
             return True
         logger.info("No hay más acciones para deshacer.")
         return False
@@ -165,6 +185,16 @@ class DibujoManager:
             self.historial_index += 1
             self._reconstruir_dibujo()
             logger.info("Acción rehecha.")
+            
+            # Narrar la acción si el asistente está disponible
+            try:
+                from . import sistema_interactivo
+                if hasattr(sistema_interactivo, 'asistente'):
+                    sistema_interactivo.asistente.hablar("Acción rehecha", 
+                                                       prioridad=1, categoria="edicion")
+            except:
+                pass
+                
             return True
         logger.info("No hay más acciones para rehacer.")
         return False
@@ -408,45 +438,45 @@ class DibujoManager:
         self.capa_temporal = np.zeros_like(self.dibujo)
         
         for i, (nombre, color) in enumerate(self.paleta_colores.items()):
-            x = x_base + (i % 3) * (tamano_cuadro + margen)
-            y = y_base + (i // 3) * (tamano_cuadro + margen)
-            
-            # Dibujar cuadro de color
-            cv2.rectangle(
-                self.capa_temporal,
-                (x, y),
-                (x + tamano_cuadro, y + tamano_cuadro),
-                tuple(color),
-                -1
-            )
-            
-            # Marcar color seleccionado
-            if tuple(color) == self.color_dibujo:
-                cv2.rectangle(
-                    self.capa_temporal,
-                    (x - 2, y - 2),
-                    (x + tamano_cuadro + 2, y + tamano_cuadro + 2),
-                    (255, 255, 255),
-                    2
-                )
-            
-            # Texto con nombre del color
-            cv2.putText(
-                self.capa_temporal,
-                nombre,
-                (x, y + tamano_cuadro + 15),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.4,
-                (255, 255, 255),
-                1
-            )
-    
+           x = x_base + (i % 3) * (tamano_cuadro + margen)
+           y = y_base + (i // 3) * (tamano_cuadro + margen)
+           
+           # Dibujar cuadro de color
+           cv2.rectangle(
+               self.capa_temporal,
+               (x, y),
+               (x + tamano_cuadro, y + tamano_cuadro),
+               tuple(color),
+               -1
+           )
+           
+           # Marcar color seleccionado
+           if tuple(color) == self.color_dibujo:
+               cv2.rectangle(
+                   self.capa_temporal,
+                   (x - 2, y - 2),
+                   (x + tamano_cuadro + 2, y + tamano_cuadro + 2),
+                   (255, 255, 255),
+                   2
+               )
+           
+           # Texto con nombre del color
+           cv2.putText(
+               self.capa_temporal,
+               nombre,
+               (x, y + tamano_cuadro + 15),
+               cv2.FONT_HERSHEY_SIMPLEX,
+               0.4,
+               (255, 255, 255),
+               1
+           )
+   
     def obtener_dibujo(self) -> np.ndarray:
-        """Obtiene la imagen actual del dibujo combinada con la capa temporal."""
-        # Combinar dibujo con capa temporal
-        resultado = cv2.addWeighted(self.dibujo, 1, self.capa_temporal, 1, 0)
-        return resultado
-    
+       """Obtiene la imagen actual del dibujo combinada con la capa temporal."""
+       # Combinar dibujo con capa temporal
+       resultado = cv2.addWeighted(self.dibujo, 1, self.capa_temporal, 1, 0)
+       return resultado
+   
     def obtener_dibujo_sin_capa_temporal(self) -> np.ndarray:
-        """Obtiene la imagen actual del dibujo sin la capa temporal."""
-        return self.dibujo.copy()
+       """Obtiene la imagen actual del dibujo sin la capa temporal."""
+       return self.dibujo.copy()

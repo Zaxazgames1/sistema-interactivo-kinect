@@ -11,6 +11,7 @@ from .text_recognizer import TextRecognizer
 from .voice_engine import VoiceEngine
 from .ui_manager import UIManager
 from .dibujo_manager import DibujoManager
+from .asistente_virtual import AsistenteVirtual
 from .sistema_interactivo import SistemaInteractivo
 
 # Exportar clases para que sean accesibles directamente desde el módulo
@@ -23,7 +24,8 @@ __all__ = [
     'TextRecognizer',
     'VoiceEngine',
     'UIManager',
-    'DibujoManager'
+    'DibujoManager',
+    'AsistenteVirtual'
 ]
 
 # Versión del módulo

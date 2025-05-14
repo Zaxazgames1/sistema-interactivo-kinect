@@ -1,16 +1,75 @@
-# Archivos de credenciales y configuración sensible
+# ========================================
+# ARCHIVOS DE CONFIGURACIÓN SENSIBLES
+# ========================================
+# Credenciales y API keys - NUNCA subir estos archivos
 google_credentials.json
 configuracion_voz.json
+.env
+.env.*
+*.key
+*.pem
+*.crt
+*.p12
 
-# Directorio temporal de audio
+# ========================================
+# ARCHIVOS Y DIRECTORIOS TEMPORALES
+# ========================================
+# Directorios temporales
 temp_audio/
 **/temp_audio/
+temp/
+tmp/
+cache/
+.temp/
+.tmp/
+.cache/
 
-# Archivos temporales de Python
+# Archivos temporales de sesión
+sesiones/
+**/sesiones/
+*.session
+autosave_*.session
+
+# ========================================
+# ARCHIVOS GENERADOS POR EL SISTEMA
+# ========================================
+# Archivos de salida
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+texto_reconocido.txt
+dibujo.png
+
+# Archivos de log
+*.log
+logs/
+*.log.*
+sistema_kinect.log
+
+# Archivos de audio temporales
+*.mp3
+*.wav
+*.m4a
+*.ogg
+*.flac
+
+# ========================================
+# PYTHON
+# ========================================
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
+*.pyo
+*.pyd
+
+# C extensions
 *.so
+
+# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -24,31 +83,236 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
-# Archivos temporales y de sesión
-*.tmp
-*.temp
-*.log
-sistema_kinect.log
-*.session
-sesiones/
+# PyInstaller
+*.manifest
+*.spec
 
-# Archivos generados y de salida
-*.png
-texto_reconocido.txt
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
 
-# Archivos específicos del sistema operativo
-.DS_Store
-Thumbs.db
-ehthumbs.db
-Desktop.ini
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
 
-# Entornos virtuales
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# ========================================
+# ENTORNOS VIRTUALES
+# ========================================
+# Entornos virtuales de Python
 venv/
 env/
 ENV/
-.env
-.venv
+.env/
+.venv/
+virtualenv/
+.virtualenv/
+pyenv/
+.pyenv/
+conda-env/
+.conda-env/
+myenv/
+.myenv/
+
+# ========================================
+# EDITORES Y IDEs
+# ========================================
+# Visual Studio Code
+.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+.idea_modules/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.*.swp
+.*.swo
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+
+# ========================================
+# SISTEMA OPERATIVO
+# ========================================
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.DS_Store?
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Linux
+.directory
+.Trash-*
+.nfs*
+
+# ========================================
+# ARCHIVOS DE RESPALDO
+# ========================================
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+*.tmp
+*.temp
+.*.backup
+.backup/
+backup/
+backups/
+
+# ========================================
+# DEPENDENCIAS Y PAQUETES
+# ========================================
+# Node (si se usa para algo)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ========================================
+# ARCHIVOS DE DOCUMENTACIÓN LOCAL
+# ========================================
+# Sphinx documentation
+docs/_build/
+site/
+
+# ========================================
+# ARCHIVOS DE BASE DE DATOS
+# ========================================
+*.db
+*.sqlite
+*.sqlite3
+db.sqlite3
+
+# ========================================
+# ARCHIVOS COMPRIMIDOS
+# ========================================
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+# ========================================
+# ARCHIVOS ESPECÍFICOS DEL PROYECTO
+# ========================================
+# Modelos de Machine Learning (si son muy grandes)
+modelos/*.pth
+modelos/*.h5
+modelos/*.pkl
+modelos/*.model
+
+# Datos de prueba grandes
+datos_prueba/
+test_data/
+
+# Videos (si son generados)
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# ========================================
+# CARPETAS DE OUTPUT/RESULTADOS
+# ========================================
+output/
+resultados/
+results/
+exports/
+
+# ========================================
+# CONFIGURACIÓN LOCAL
+# ========================================
+# Archivos de configuración local
+config.local.json
+configuracion.local.json
+*.local
+local_settings.py
+
+# ========================================
+# ARCHIVOS DE CERTIFICADOS SSL
+# ========================================
+*.cert
+*.cer
+ssl/
+certs/
+
+# ========================================
+# MISCELÁNEA
+# ========================================
+# Archivos de parche
+*.patch
+*.diff
+
+# Archivos de configuración del usuario
+.user
+*.user
+
+# Carpetas de sincronización en la nube
+.dropbox
+.dropbox.attr

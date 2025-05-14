@@ -18,6 +18,7 @@ from .text_recognizer import TextRecognizer
 from .voice_engine import VoiceEngine
 from .ui_manager import UIManager
 from .dibujo_manager import DibujoManager
+from .asistente_virtual import AsistenteVirtual
 
 logger = logging.getLogger("SistemaKinect.SistemaInteractivo")
 
@@ -62,6 +63,9 @@ class SistemaInteractivo:
                     self.voice_engine.cambiar_motor("pyttsx3")
             except Exception as e2:
                 logger.warning(f"También falló el motor de respaldo: {e2}")
+        
+        # Inicializar asistente virtual
+        self.asistente = AsistenteVirtual(self.voice_engine)
         
         self.ui_manager = UIManager(self.config_manager)
         self.dibujo_manager = DibujoManager(self.config_manager)
@@ -133,6 +137,10 @@ class SistemaInteractivo:
                 logger.error(f"Error al crear directorio de sesiones: {e}")
         
         logger.info("Sistema interactivo iniciado correctamente.")
+        
+        # Saludar al usuario
+        self.asistente.saludar()
+        
         return True
     
     def _obtener_frame(self) -> Optional[cv2.Mat]:
@@ -143,17 +151,24 @@ class SistemaInteractivo:
         """Procesa la acción correspondiente al botón seleccionado."""
         self.ui_manager.boton_seleccionado = boton
         
+        # Narrar la selección del botón
+        self.asistente.hablar(f"Has seleccionado {boton}", prioridad=2, categoria="navegacion")
+        
         if boton == "Dibujar":
             # Activar modo dibujo
             self.modo_actual = "dibujar"
             self.ui_manager.estado_mano = "Modo: Dibujo"
             self.ui_manager.mostrar_mensaje("Modo dibujo activado. Use el dedo índice para dibujar.", 2)
+            # Narrar el cambio de modo
+            self.asistente.anunciar_modo("dibujar")
         
         elif boton == "Borrar":
             # Activar modo borrador
             self.modo_actual = "borrar"
             self.ui_manager.estado_mano = "Modo: Borrador"
             self.ui_manager.mostrar_mensaje("Modo borrador activado. Use la mano para borrar.", 2)
+            # Narrar el cambio de modo
+            self.asistente.anunciar_modo("borrar")
         
         elif boton == "Limpiar":
             # Limpiar el lienzo y desactivar cualquier modo
@@ -161,17 +176,23 @@ class SistemaInteractivo:
             self.modo_actual = None  # Desactivar modo actual
             self.ui_manager.estado_mano = "Lienzo limpiado"
             self.ui_manager.mostrar_mensaje("Lienzo limpiado. Seleccione 'Dibujar' o 'Borrar' para continuar.", 2)
+            # Narrar la acción
+            self.asistente.hablar("Lienzo limpiado completamente", prioridad=2, categoria="accion")
         
         elif boton == "Guardar":
             # Procesar guardado y desactivar cualquier modo
             self._procesar_guardado()
             self.modo_actual = None  # Desactivar modo actual
             self.ui_manager.estado_mano = "Guardando..."
+            # Narrar el guardado
+            self.asistente.anunciar_guardado()
         
         elif boton == "Salir":
             # Salir del programa
             self.ejecutando = False
             self.ui_manager.estado_mano = "Cerrando..."
+            # Despedirse
+            self.asistente.despedir()
         
         # Actualizar la interfaz
         if hasattr(self.ui_manager, 'mostrar_modo'):
@@ -231,6 +252,9 @@ class SistemaInteractivo:
                 self.ui_manager.estado_mano = "Texto reconocido"
                 self.ui_manager.mostrar_mensaje(f"Texto: {texto_reconocido}", 5)
                 
+                # Narrar el texto reconocido
+                self.asistente.anunciar_texto_reconocido(texto_reconocido)
+                
                 # Sintetizar voz con Google TTS
                 if self.voice_engine.iniciado:
                     # Verificar motor actual y cambiar a Google TTS si es necesario
@@ -251,6 +275,7 @@ class SistemaInteractivo:
                 logger.warning("No se reconoció texto en la imagen")
                 self.ui_manager.mostrar_mensaje("No se reconoció texto", 3)
                 self.ui_manager.estado_mano = "Sin texto reconocido"
+                self.asistente.anunciar_texto_reconocido(None)
         except Exception as e:
             logger.error(f"Error en proceso de reconocimiento: {e}")
             self.ui_manager.mostrar_mensaje("Error en reconocimiento de texto", 3)
@@ -271,6 +296,11 @@ class SistemaInteractivo:
             self.ultima_posicion_mano = (x_index, y_index)
             self.ui_manager.dibujar_indicador_mano(x_index, y_index)
             
+            # Verificar si estamos sobre algún botón para dar feedback
+            boton_bajo_cursor = self.ui_manager.verificar_punto_en_boton(x_index, y_index)
+            if boton_bajo_cursor:
+                self.asistente.anunciar_boton_hover(boton_bajo_cursor)
+            
             # Detectar dedos levantados
             dedos_levantados = self.hand_tracker.detectar_dedos_levantados(hand_landmarks)
             
@@ -280,12 +310,18 @@ class SistemaInteractivo:
             
             # Verificar gesto para dibujar (solo índice levantado)
             if self.modo_actual == "dibujar" and dedos_levantados[1] and not any(dedos_levantados[2:]):
+                # Narrar inicio de trazo si es el primer punto
+                if not self.dibujo_manager.dibujando:
+                    self.asistente.anunciar_trazo("inicio")
                 self.dibujo_manager.dibujar_punto(x_index, y_index)
             # Verificar gesto para borrar
             elif self.modo_actual == "borrar":
                 self.dibujo_manager.borrar_punto(x_index, y_index)
             else:
                 # Si no estamos en un modo de dibujo o borrado, simplemente terminamos cualquier trazo
+                # Narrar fin de trazo si estaba dibujando
+                if self.dibujo_manager.dibujando:
+                    self.asistente.anunciar_trazo("fin")
                 self.dibujo_manager.terminar_dibujo()
             
             # Verificar gesto para seleccionar botón (puño cerrado)
@@ -352,6 +388,19 @@ class SistemaInteractivo:
                     ruta = self.dibujo_manager.guardar_sesion(nombre_sesion)
                     if ruta:
                         self.ui_manager.mostrar_mensaje(f"Sesión guardada: {nombre_sesion}", 2)
+                elif tecla == ord('v'):  # v para cambiar verbosidad
+                    nivel_actual = self.asistente.nivel_verbosidad.value
+                    nuevo_nivel = (nivel_actual + 1) % 5
+                    self.asistente.cambiar_verbosidad(nuevo_nivel)
+                elif tecla == ord('p'):  # p para cambiar personalidad
+                    personalidades = ["profesional", "amigable", "infantil", "tutorial"]
+                    indice_actual = personalidades.index(self.asistente.personalidad.value)
+                    nueva_personalidad = personalidades[(indice_actual + 1) % len(personalidades)]
+                    self.asistente.cambiar_personalidad(nueva_personalidad)
+                elif tecla == ord('t'):  # t para toggle modo tutorial
+                    self.asistente.activar_modo_tutorial(not self.asistente.modo_tutorial)
+                elif tecla == ord('a'):  # a para activar/desactivar asistente
+                    self.asistente.activar_desactivar(not self.asistente.activo)
                 
                 # Control de velocidad del bucle
                 tiempo_procesamiento = time.time() - tiempo_inicio
@@ -370,6 +419,11 @@ class SistemaInteractivo:
     def cerrar(self) -> None:
         """Cierra todos los módulos del sistema."""
         logger.info("Cerrando sistema interactivo...")
+        
+        # Despedirse si el asistente está activo
+        if hasattr(self, 'asistente') and self.asistente.activo:
+            self.asistente.despedir()
+            time.sleep(2)  # Dar tiempo para que termine de hablar
         
         # Guardar sesión antes de cerrar
         try:
