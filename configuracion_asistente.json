@@ -5,5 +5,8 @@
     "modo_tutorial": false,
     "repetir_instrucciones": true,
     "tiempo_entre_consejos": 60,
-    "volumen_efectos": 0.8
+    "volumen_efectos": 0.8,
+    "usar_efectos_sonido": true,
+    "usar_musica_fondo": true,
+    "usar_voz_emotiva": true
 }

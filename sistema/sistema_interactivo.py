@@ -81,6 +81,9 @@ class SistemaInteractivo:
         self.botones = self.config.get("ui", {}).get("botones", {})
         self.ultima_posicion_mano = (0, 0)
         
+        # Timer para estadísticas periódicas
+        self.ultimo_reporte_estadisticas = time.time()
+        
         # Inicializar semillas para números aleatorios
         np.random.seed(int(time.time()))
     
@@ -379,6 +382,11 @@ class SistemaInteractivo:
                     frames_contados = 0
                     ultima_actualizacion_fps = tiempo_actual
                 
+                # Dar estadísticas periódicas
+                if tiempo_actual - self.ultimo_reporte_estadisticas > 300:  # Cada 5 minutos
+                    self.asistente.dar_estadisticas_periodicas()
+                    self.ultimo_reporte_estadisticas = tiempo_actual
+                
                 # Verificar salida
                 tecla = cv2.waitKey(1) & 0xFF
                 if tecla == ord('q') or tecla == 27:  # q o ESC
@@ -393,7 +401,7 @@ class SistemaInteractivo:
                     nuevo_nivel = (nivel_actual + 1) % 5
                     self.asistente.cambiar_verbosidad(nuevo_nivel)
                 elif tecla == ord('p'):  # p para cambiar personalidad
-                    personalidades = ["profesional", "amigable", "infantil", "tutorial"]
+                    personalidades = ["profesional", "amigable", "infantil", "tutorial", "artista", "motivador"]
                     indice_actual = personalidades.index(self.asistente.personalidad.value)
                     nueva_personalidad = personalidades[(indice_actual + 1) % len(personalidades)]
                     self.asistente.cambiar_personalidad(nueva_personalidad)
@@ -401,6 +409,21 @@ class SistemaInteractivo:
                     self.asistente.activar_modo_tutorial(not self.asistente.modo_tutorial)
                 elif tecla == ord('a'):  # a para activar/desactivar asistente
                     self.asistente.activar_desactivar(not self.asistente.activo)
+                elif tecla == ord('m'):  # m para toggle música
+                    self.asistente.cambiar_configuracion_sonido(
+                        usar_musica=not self.asistente.usar_musica_fondo)
+                elif tecla == ord('e'):  # e para toggle efectos
+                    self.asistente.cambiar_configuracion_sonido(
+                        usar_efectos=not self.asistente.usar_efectos_sonido)
+                elif tecla == ord('x'):  # x para toggle voz emotiva
+                    self.asistente.cambiar_configuracion_sonido(
+                        usar_voz_emotiva=not self.asistente.usar_voz_emotiva)
+                elif tecla == ord('+'):  # + para subir volumen
+                    volumen_actual = self.asistente.volumen_efectos
+                    self.asistente.ajustar_volumenes(volumen_efectos=min(1.0, volumen_actual + 0.1))
+                elif tecla == ord('-'):  # - para bajar volumen
+                    volumen_actual = self.asistente.volumen_efectos
+                    self.asistente.ajustar_volumenes(volumen_efectos=max(0.0, volumen_actual - 0.1))
                 
                 # Control de velocidad del bucle
                 tiempo_procesamiento = time.time() - tiempo_inicio
